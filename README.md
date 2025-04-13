@@ -1,0 +1,3 @@
+```aiignore
+mvn clean install
+```
