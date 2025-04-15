@@ -20,9 +20,12 @@ public class ParkingSpotService {
     @Autowired
     public ParkingSpotService(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
-        for (int i = 1; i <= 12; i++) {
-            String spotId = "SPOT_" + i;
-            spots.put(spotId, new ParkingSpot(spotId, null));
+        for (char zone = 'A'; zone <= 'C'; zone++) {
+            String zoneId = "ZONE_" + zone;
+            for (int i = 1; i <= 12; i++) {
+                String spotId = zoneId + "_SPOT_" + i;
+                spots.put(spotId, new ParkingSpot(spotId, null, null, zoneId));
+            }
         }
     }
 
@@ -33,9 +36,11 @@ public class ParkingSpotService {
                 ParkingSpot spot = entry.getValue();
                 if (spot.isAvailable()) {
                     spot.setAvailable(false);
+                    spot.setReserveBy(userId);
+
                     Booking booking = new Booking(spot, new User(userId));
                     activeBookings.put(entry.getKey(), booking);
-                    messagingTemplate.convertAndSend("/topic/parking", spot); // Notify here
+                    messagingTemplate.convertAndSend("/topic/parking", spot);
                     return Optional.of(booking);
                 }
             }
@@ -52,7 +57,7 @@ public class ParkingSpotService {
             if (booking != null) {
                 ParkingSpot spot = booking.getSpot();
                 spot.setAvailable(true);
-                messagingTemplate.convertAndSend("/topic/parking", spot); // Notify here
+                messagingTemplate.convertAndSend("/topic/parking", spot);
                 return true;
             }
             return false;
