@@ -2,6 +2,8 @@ package com.smartparking.parking_system.service;
 
 import com.smartparking.parking_system.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
@@ -16,15 +18,23 @@ public class ParkingSpotService {
     private final Map<String, ParkingSpot> spots = new ConcurrentHashMap<>();
     private final ReentrantLock lock = new ReentrantLock();
     private final SimpMessagingTemplate messagingTemplate;
+    private boolean available = false;
+    private String reserveBy = "Test";
 
     @Autowired
     public ParkingSpotService(SimpMessagingTemplate messagingTemplate) {
         this.messagingTemplate = messagingTemplate;
         for (char zone = 'A'; zone <= 'C'; zone++) {
+            available = false;
+            reserveBy = "Test";
             String zoneId = "ZONE_" + zone;
             for (int i = 1; i <= 12; i++) {
                 String spotId = zoneId + "_SPOT_" + i;
-                spots.put(spotId, new ParkingSpot(spotId, null, null, zoneId));
+                if (i == 12) {
+                    available = true;
+                    reserveBy = null;
+                }
+                spots.put(spotId, new ParkingSpot(spotId, reserveBy, available, null, zoneId));
             }
         }
     }
@@ -36,15 +46,15 @@ public class ParkingSpotService {
                 ParkingSpot spot = entry.getValue();
                 if (spot.isAvailable()) {
                     spot.setAvailable(false);
-                    spot.setReserveBy(userId);
-
-                    Booking booking = new Booking(spot, new User(userId));
+                    spot.setReservedBy(userId);
+                    Booking booking = new Booking(spot, new User(userId), true);
                     activeBookings.put(entry.getKey(), booking);
                     messagingTemplate.convertAndSend("/topic/parking", spot);
                     return Optional.of(booking);
                 }
             }
-            return Optional.empty(); // No spots available
+            Booking booking = new Booking(null, null, false);
+            return Optional.of(booking);
         } finally {
             lock.unlock();
         }
