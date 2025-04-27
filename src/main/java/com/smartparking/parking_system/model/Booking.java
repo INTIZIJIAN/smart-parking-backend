@@ -1,18 +1,28 @@
 package com.smartparking.parking_system.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import java.time.LocalDateTime;
+
 public class Booking {
-    private ParkingSpot spot;
-    private User user;
     private boolean isSuccess;
+    private User user;
+    private String status;
 
-
-    public Booking(ParkingSpot spot, User user, boolean isSuccess) {
-        this.spot = spot;
+    public Booking(User user, boolean isSuccess, String status) {
         this.user = user;
         this.isSuccess = isSuccess;
+        this.status = status;
     }
 
-    public ParkingSpot getSpot() { return spot; }
     public User getUser() { return user; }
-    public boolean isSuccess() { return isSuccess; }
+    public boolean isSuccess() { return isSuccess; };
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
 }

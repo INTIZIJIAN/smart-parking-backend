@@ -1,31 +1,31 @@
 package com.smartparking.parking_system.model;
 
-import java.time.Duration;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import java.util.List;
 
 public class ParkingSpot {
     private String id;
     private boolean isAvailable;
-    private String reservedBy;
-    private Duration duration;
     private String parkingZone;
+    private List<TimeSlot> durations;
 
-    public ParkingSpot(String id, String reserveBy, boolean isAvailable, Duration duration, String parkingZone) {
+    public ParkingSpot(String id, boolean isAvailable, String parkingZone, List<TimeSlot> durations) {
         this.id = id;
         this.isAvailable = isAvailable;
-        this.reservedBy = reserveBy;
-        this.duration = duration;
         this.parkingZone = parkingZone;
+        this.durations = durations;
     }
 
+    // Getter and Setter
     public String getId() { return id; }
-    public String getReservedBy() { return reservedBy;}
-    public Duration getDuration() { return duration;}
-    public String getParkingZone() { return parkingZone;}
+
+    public String getParkingZone() { return parkingZone; }
 
     public boolean isAvailable() { return isAvailable; }
 
-    public void setAvailable(boolean available) { isAvailable = available; }
-    public void setReservedBy(String userId) {reservedBy = userId;}
-    public void setDuration(Duration duration) {this.duration = duration;}
+    public List<TimeSlot> getDurations() { return durations; }
 
+    public void setAvailable(boolean available) { this.isAvailable = available; }
+
+    public void setDurations(List<TimeSlot> durations) { this.durations = durations; }
 }
